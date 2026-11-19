@@ -1,0 +1,21 @@
+name: Prueba de fuentes desde la nube
+on: workflow_dispatch
+jobs:
+  prueba:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Códigos HTTP de cada fuente (solo comprobación; no se guarda nada)
+        run: |
+          c() { printf '%-28s %s\n' "$1" "$(curl -s -o /dev/null -m 25 -A 'Mozilla/5.0' -w '%{http_code}' "$2")"; }
+          c "Binance funding"      "https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1"
+          c "Binance prima perp."  "https://fapi.binance.com/fapi/v1/premiumIndexKlines?symbol=BTCUSDT&interval=1d&limit=1"
+          c "Binance Vision"       "https://data.binance.vision/data/futures/um/daily/metrics/BTCUSDT/BTCUSDT-metrics-2026-11-17.zip"
+          c "Bitstamp"             "https://www.bitstamp.net/api/v2/ohlc/btcusd/?step=86400&limit=1"
+          c "alternative.me F&G"   "https://api.alternative.me/fng/?limit=1"
+          c "CoinMetrics"          "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD&start_time=2026-11-15&frequency=1d"
+          c "Yahoo ^GSPC"          "https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?range=5d&interval=1d"
+          c "Yahoo DXY"            "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?range=5d&interval=1d"
+          c "FRED WALCL"           "https://fred.stlouisfed.org/graph/fredgraph.csv?id=WALCL"
+          c "Deribit DVOL"         "https://www.deribit.com/api/v2/public/get_volatility_index_data?currency=BTC&resolution=86400&start_timestamp=1794000000000&end_timestamp=1795000000000"
+          c "Coinbase"             "https://api.exchange.coinbase.com/products/BTC-USD/candles?granularity=86400"
+          c "BGeometrics"          "https://bitcoin-data.com/v1/sth-realized-price"
