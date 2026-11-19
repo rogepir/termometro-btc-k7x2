@@ -513,13 +513,12 @@ var PROV=null, EC=null, EDAD={hoy_parcial:"hoy (parcial)",hoy_completo:"hoy (com
 function edadTxt(x){return x.edad==="antiguo"?"más antiguo ("+corta(x.fecha)+")":EDAD[x.edad];}
 function provisional(){
   var el=$("provisional"), h="<div class='prov'><div class='eyebrow'>Hoy en curso · de dónde salen los datos</div>";
-  if(PUB){el.innerHTML=h+"<p class='num' style='margin:4px 0 0'>La versión pública no tiene el día en curso: solo muestra días cerrados. El día en curso está en la versión local.</p></div>";return;}
   var P=PROV;
-  if(!P){el.innerHTML=h+"<p class='num' style='margin:4px 0 0'>Hoy en curso aún no calculado: se recalcula con cada actualización (o con <b>VER_PROVISIONAL.bat</b>). Mientras tanto se ve el último día cerrado.</p></div>";return;}
+  if(!P){el.innerHTML=h+"<p class='num' style='margin:4px 0 0'>"+(PUB?"El día en curso aún no está disponible; se actualiza solo. Mientras tanto se ve el último día cerrado.":"Hoy en curso aún no calculado: se recalcula con cada actualización (o con <b>VER_PROVISIONAL.bat</b>). Mientras tanto se ve el último día cerrado.")+"</p></div>";return;}
   if(P.estado!=="ok"){el.innerHTML=h+"<div class='aviso' style='margin:6px 0 0'>"+esc(P.mensaje||"No se pudo calcular.")+"</div><p class='num'>Intento: "+esc(P.calculado_utc||"")+"</p></div>";return;}
   var t=new Date(P.calculado_utc.replace(" UTC","").replace(" ","T")+"Z"), hora=t.toLocaleString("es-ES",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   var av="";
-  if(P.dia!==new Date().toISOString().slice(0,10)||Date.now()-t>6*36e5) av+="<div class='aviso' style='margin:8px 0 0'><b>Caducada:</b> se calculó el "+esc(hora)+". Mientras no se recalcule se ve el último día cerrado; ejecuta VER_PROVISIONAL.bat o la actualización.</div>";
+  if(P.dia!==new Date().toISOString().slice(0,10)||Date.now()-t>6*36e5) av+="<div class='aviso' style='margin:8px 0 0'><b>Caducada:</b> se calculó el "+esc(hora)+". Mientras no se recalcule se ve el último día cerrado"+(PUB?".":"; ejecuta VER_PROVISIONAL.bat o la actualización.")+"</div>";
   if(D.ultimo_dia!==P.ultimo_cerrado) av+="<div class='aviso' style='margin:8px 0 0'>La barra oficial llega al "+esc(D.ultimo_dia)+" y el día en curso parte del "+esc(P.ultimo_cerrado)+": no son comparables hasta que se actualicen.</div>";
   function bp(nom,b,of){var z=zonaDe(b);return "<div class='b2'><div class='row'><b>"+nom+"</b><span class='sp'></span><span class='zt z-"+z+"'>"+ZC[z]+" · "+(b==null?"—":f1(b,1))+"</span></div><div class='gauge' role='img' aria-label='"+nom+" provisional: "+f1(b,1)+" de 100'><i style='left:"+(b==null?50:b)+"%'></i></div>"+(of==null?"":"<div class='num'>Oficial cerrada ("+esc(D.ultimo_dia)+"): "+f1(of,1)+"</div>")+"</div>";}
   var M={1:"venta confirmada","-1":"compra confirmada",2:"venta sin confirmar","-2":"compra sin confirmar",0:""};
@@ -535,7 +534,6 @@ function provisional(){
   el.innerHTML=h;
 }
 function cargaProv(){
-  if(PUB){provisional();return;}
   var s=document.createElement("script");s.src="provisional.js?"+Date.now();
   s.onload=function(){PROV=window.PROVISIONAL||null;var P=PROV;EC=(P&&P.estado==="ok"&&P.dia===new Date().toISOString().slice(0,10)&&P.ultimo_cerrado===D.ultimo_dia&&Date.now()-new Date(P.calculado_utc.replace(" UTC","").replace(" ","T")+"Z")<6*36e5)?P:null;provisional();if(EC)principal();};s.onerror=function(){provisional();};
   document.head.appendChild(s);
